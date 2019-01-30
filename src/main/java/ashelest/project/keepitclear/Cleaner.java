@@ -69,18 +69,19 @@ public abstract class Cleaner {
         bufferedWriter = new BufferedWriter(new FileWriter("log.txt", true));
         switch (result) {
             case FAIL:
-                bufferedWriter.write("[" + time + "] File " + filepath + " was not moved!");
+                bufferedWriter.write("[" + time + "] File " + filepath + " was not moved!\n");
                 break;
             case DELETED:
-                bufferedWriter.write("[" + time + "] File " + filepath + " deleted.");
+                bufferedWriter.write("[" + time + "] File " + filepath + " deleted.\n");
                 break;
             case MOVED_LOCAL:
-                bufferedWriter.write("[" + time + "] File " + filepath + " moved to local folder.");
+                bufferedWriter.write("[" + time + "] File " + filepath + " moved to local folder.\n");
                 break;
             case MOVED_CLOUD:
-                bufferedWriter.write("[" + time + "] File " + filepath + " moved to the cloud.");
+                bufferedWriter.write("[" + time + "] File " + filepath + " moved to the cloud.\n");
                 break;
         }
+        bufferedWriter.close();
 
     }
 

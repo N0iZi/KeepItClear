@@ -11,7 +11,13 @@ import javax.swing.filechooser.FileSystemView;
 public class Desktop {
 
     private File[] getFilesList() {
+        /*
+        FOR CLEANER CLASSES TESTS!
+        1. Comment first row
+        2. Uncomment second row
+         */
         File desktopLocation = FileSystemView.getFileSystemView().getHomeDirectory();
+        //File desktopLocation = new File(FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath() + "/test");
         return desktopLocation.listFiles();
     }
 

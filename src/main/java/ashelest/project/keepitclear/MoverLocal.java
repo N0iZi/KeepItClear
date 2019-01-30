@@ -28,7 +28,7 @@ public class MoverLocal extends Cleaner {
         for (String file :
                 files) {
             File toMove = new File(file);
-            if (toMove.renameTo(new File(folderPath))) {
+            if (toMove.renameTo(new File(folderPath + "\\" + toMove.getName()))) {
                 if (toLog) {
                     try {
                         super.logAction(file, LogRows.MOVED_LOCAL);
