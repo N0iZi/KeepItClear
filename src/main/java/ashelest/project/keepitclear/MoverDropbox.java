@@ -49,7 +49,7 @@ public class MoverDropbox extends Cleaner {
         for (String file :
                 files) {
             try (InputStream in = new FileInputStream(file)) {
-                FileMetadata metadata = client.files().uploadBuilder("keepitclear/" + new File(file).getName()).uploadAndFinish(in);
+                FileMetadata metadata = client.files().uploadBuilder("/keepitclear/" + new File(file).getName()).uploadAndFinish(in);
             } catch (Exception e) {
                 e.printStackTrace();
                 uploadFailed = true;
@@ -71,6 +71,7 @@ public class MoverDropbox extends Cleaner {
                         JOptionPane.showMessageDialog(null, "Unfortunately, something went wrong while logging!\nLogging if off now. Please check the folder with application is without \"Read only\" flag checked.", "KeepItClear: Logging error!", JOptionPane.ERROR_MESSAGE);
                         toLog = false;
                     }
+                    new File(file).delete();
                 }
             }
         }
