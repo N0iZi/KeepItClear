@@ -33,11 +33,8 @@ public class MoverGoogleDrive extends Cleaner {
     private List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_METADATA_READONLY);
     private String CREDENTIALS_FILE_PATH = "/credentials.json"; //credentials.json file is required to be created through Google Developers site and copied to src/main/java/resources folder
 
-    public boolean isLoggedIn;
-
     public MoverGoogleDrive() {
         super();
-        isLoggedIn = false;
     }
 
     private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
