@@ -64,6 +64,7 @@ public class MoverDropbox extends Cleaner {
                         toLog = false;
                     }
                     result = false;
+                    uploadFailed = false;
                 } else {
                     try {
                         super.logAction(file, LogRows.MOVED_CLOUD);
