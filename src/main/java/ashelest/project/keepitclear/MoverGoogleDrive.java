@@ -30,7 +30,7 @@ public class MoverGoogleDrive extends Cleaner {
     private JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private String TOKENS_DIRECTORY_PATH = "tokens";
 
-    private List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_METADATA_READONLY);
+    private List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_FILE);
     private String CREDENTIALS_FILE_PATH = "/credentials.json"; //credentials.json file is required to be created through Google Developers site and copied to src/main/java/resources folder
 
     public MoverGoogleDrive() {
@@ -80,7 +80,8 @@ public class MoverGoogleDrive extends Cleaner {
                 files) {
             File fileMetadata = new File();
             java.io.File filePath = new java.io.File(file);
-            fileMetadata.setName("keepitclear/" + filePath.getName());
+            fileMetadata.setName(filePath.getName());
+            // TODO: Adding files to separate folder
             FileContent mediaContent = new FileContent(null, filePath);
             try {
                 File uploadFile = service.files().create(fileMetadata, mediaContent)
