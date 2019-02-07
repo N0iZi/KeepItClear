@@ -2,6 +2,8 @@ package ashelest.project.keepitclear;
 
 import org.junit.Test;
 
+import java.util.Date;
+
 import static junit.framework.TestCase.assertTrue;
 
 public class ConfiguratorTest {
@@ -32,5 +34,21 @@ public class ConfiguratorTest {
         Configurator configurator = new Configurator();
         configurator.setCleaner(Configurator.CleanerTypes.MOVER_GOOGLEDRIVE);
         assertTrue(configurator.getCleaner().cleanUp(1, true));
+    }
+
+    @Test
+    public void writeConfigurationTest() {
+        Configurator configurator = new Configurator();
+        configurator.setCleaner(Configurator.CleanerTypes.MOVER_LOCAL, "TEST_FOLDER_2_PATH");
+        configurator.setPeriod(30);
+        configurator.setSinceLastAccess(14);
+        configurator.setSinceDate(new Date(649874654));
+        assertTrue(configurator.writeConfiguration());
+    }
+
+    @Test
+    public void readConfigurationTest() {
+        Configurator configurator = new Configurator();
+        assertTrue(configurator.readConfiguration());
     }
 }
