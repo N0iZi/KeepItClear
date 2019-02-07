@@ -105,6 +105,18 @@ public class Configurator {
         return sinceDate;
     }
 
+    public void enableLog() {
+        toLog = true;
+    }
+
+    public void disableLog() {
+        toLog = false;
+    }
+
+    public boolean getToLog() {
+        return toLog;
+    }
+
     public void setCleaner(CleanerTypes cleanerType) {
         switch (cleanerType) {
             case REMOVER:
