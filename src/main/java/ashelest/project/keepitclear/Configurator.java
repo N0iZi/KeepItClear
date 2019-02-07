@@ -2,11 +2,20 @@ package ashelest.project.keepitclear;
 
 import com.dropbox.core.*;
 import com.dropbox.core.json.JsonReader;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import javax.swing.*;
 import java.awt.Desktop;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Configurator {
 
@@ -18,12 +27,32 @@ public class Configurator {
         MOVER_GOOGLEDRIVE
     }
 
+    public boolean isOnDuty;
+
+    private class CleanerTimerTask extends TimerTask {
+
+        public void run() {
+            if (currentType != CleanerTypes.NONE) {
+                cleaner.cleanUp(sinceLastAccess * 86400000, toLog);
+            }
+        }
+
+    }
+
     private Cleaner cleaner;
+    private Timer timer;
     private String dropboxAccess;
+    private String localMoverFolder;
+    private int sinceLastAccess;
+    private int period;
+    private Date sinceDate;
+    private boolean toLog;
+
     public CleanerTypes currentType;
 
     public Configurator() {
         currentType = CleanerTypes.NONE;
+        isOnDuty = false;
     }
 
     public Cleaner getCleaner() {
@@ -33,6 +62,47 @@ public class Configurator {
     public void resetType() {
         currentType = CleanerTypes.NONE;
         cleaner = null;
+        dropboxAccess = null;
+        localMoverFolder = null;
+    }
+
+    public boolean setTimer() {
+        if (currentType != CleanerTypes.NONE) {
+            timer.scheduleAtFixedRate(new CleanerTimerTask(), sinceDate, period * 86400000);
+            isOnDuty = true;
+            return true;
+        }
+        return false;
+    }
+
+    public void dropTimer() {
+        timer.cancel();
+        timer = null;
+        isOnDuty = false;
+    }
+
+    public void setSinceLastAccess(int days) {
+        sinceLastAccess = days;
+    }
+
+    public int getSinceLastAccess() {
+        return sinceLastAccess;
+    }
+
+    public void setPeriod(int days) {
+        period = days;
+    }
+
+    public int getPeriod(int days) {
+        return period;
+    }
+
+    public void setSinceDate(Date date) {
+        sinceDate = date;
+    }
+
+    public Date getSinceDate() {
+        return sinceDate;
     }
 
     public void setCleaner(CleanerTypes cleanerType) {
@@ -65,6 +135,7 @@ public class Configurator {
                 throw new IllegalArgumentException("Too much arguments for this cleaner type");
             case MOVER_LOCAL:
                 setupMoverLocal(localFolder);
+                localMoverFolder = localFolder;
                 currentType = CleanerTypes.MOVER_LOCAL;
                 break;
             case MOVER_DROPBOX:
@@ -135,6 +206,82 @@ public class Configurator {
 
     private void setupMoverLocal(String path) {
         cleaner = new MoverLocal(path);
+    }
+
+    public boolean writeConfiguration() {
+        JSONObject configurationJson = new JSONObject();
+        switch (currentType) {
+            case NONE:
+                configurationJson.put("type", "NONE");
+                break;
+            case REMOVER:
+                configurationJson.put("type", "REMOVER");
+                break;
+            case MOVER_LOCAL:
+                configurationJson.put("type", "MOVER_LOCAL");
+                configurationJson.put("folder", localMoverFolder);
+                break;
+            case MOVER_GOOGLEDRIVE:
+                configurationJson.put("type", "MOVER_GOOGLEDRIVE");
+                break;
+            case MOVER_DROPBOX:
+                configurationJson.put("type", "MOVER_DROPBOX");
+                configurationJson.put("access", dropboxAccess);
+                break;
+        }
+        if (currentType != CleanerTypes.NONE) {
+            configurationJson.put("period", period);
+            configurationJson.put("sinceLastAccess", sinceLastAccess);
+            configurationJson.put("sinceDate", sinceDate.getTime());
+        }
+        try {
+            Files.write(Paths.get("configuration.json"), configurationJson.toJSONString().getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Can't write settings to file!", "KeepItClear: Internal error!", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        return true;
+    }
+
+    public boolean readConfiguration() {
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObject;
+        try {
+            jsonObject = (JSONObject) jsonParser.parse(new FileReader("configuration.json"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Could not read settings, or file \"configuration.json\" does not exist.", "KeepItClear: Internal error!", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        switch ((String) jsonObject.get("type")) {
+            case "NONE":
+                resetType();
+                break;
+            case "REMOVER":
+                resetType();
+                setCleaner(CleanerTypes.REMOVER);
+                break;
+            case "MOVER_LOCAL":
+                resetType();
+                localMoverFolder = (String) jsonObject.get("folder");
+                setCleaner(CleanerTypes.MOVER_LOCAL, localMoverFolder);
+                break;
+            case "MOVER_GOOGLEDRIVE":
+                resetType();
+                setCleaner(CleanerTypes.MOVER_GOOGLEDRIVE);
+                break;
+            case "MOVER_DROPBOX":
+                resetType();
+                dropboxAccess = (String) jsonObject.get("access");
+                cleaner = new MoverDropbox(dropboxAccess);
+                currentType = CleanerTypes.MOVER_DROPBOX;
+                break;
+        }
+        period = ((Long) jsonObject.get("period")).intValue();
+        sinceLastAccess = ((Long) jsonObject.get("sinceLastAccess")).intValue();
+        sinceDate = new Date((Long) jsonObject.get("sinceDate"));
+        return true;
     }
 
 }
