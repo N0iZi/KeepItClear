@@ -32,14 +32,14 @@ public class ConfiguratorTest {
     @Test
     public void setCleanerMoverGoogleDriveTest() {
         Configurator configurator = new Configurator();
-        configurator.setCleaner(Configurator.CleanerTypes.MOVER_GOOGLEDRIVE);
+        configurator.setCleaner(Configurator.CleanerTypes.MOVER_GOOGLEDRIVE, "GOOGLE_DRIVE_FOLDER_ID");
         assertTrue(configurator.getCleaner().cleanUp(1, true));
     }
 
     @Test
     public void writeConfigurationTest() {
         Configurator configurator = new Configurator();
-        configurator.setCleaner(Configurator.CleanerTypes.MOVER_LOCAL, "TEST_FOLDER_2_PATH");
+        configurator.setCleaner(Configurator.CleanerTypes.MOVER_GOOGLEDRIVE, "GOOGLE_DRIVE_FOLDER_ID");
         configurator.setPeriod(30);
         configurator.setSinceLastAccess(14);
         configurator.setSinceDate(new Date(649874654));

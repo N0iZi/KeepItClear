@@ -33,8 +33,11 @@ public class MoverGoogleDrive extends Cleaner {
     private List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_FILE);
     private String CREDENTIALS_FILE_PATH = "/credentials.json"; //credentials.json file is required to be created through Google Developers site and copied to src/main/java/resources folder
 
-    public MoverGoogleDrive() {
+    private String folderId;
+
+    public MoverGoogleDrive(String driveFolderId) {
         super();
+        this.folderId = driveFolderId;
     }
 
     private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
@@ -81,7 +84,7 @@ public class MoverGoogleDrive extends Cleaner {
             File fileMetadata = new File();
             java.io.File filePath = new java.io.File(file);
             fileMetadata.setName(filePath.getName());
-            // TODO: Adding files to separate folder
+            fileMetadata.setParents(Collections.singletonList(folderId));
             FileContent mediaContent = new FileContent(null, filePath);
             try {
                 File uploadFile = service.files().create(fileMetadata, mediaContent)

@@ -6,7 +6,7 @@ import static junit.framework.TestCase.assertTrue;
 
 public class MoverGoogleDriveTest {
 
-    public MoverGoogleDrive moverGoogleDrive = new MoverGoogleDrive();
+    public MoverGoogleDrive moverGoogleDrive = new MoverGoogleDrive("1eiUTbiQPKPigb6Zf-eW06Ks_Wvrs2fup");
 
     @Test
     public void cleanUpTest() {

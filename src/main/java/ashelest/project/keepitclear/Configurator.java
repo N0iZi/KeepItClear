@@ -42,6 +42,7 @@ public class Configurator {
     private Cleaner cleaner;
     private Timer timer;
     private String dropboxAccess;
+    private String googleDriveFolderId;
     private String localMoverFolder;
     private int sinceLastAccess;
     private int period;
@@ -117,6 +118,14 @@ public class Configurator {
         return toLog;
     }
 
+    public String getGoogleDriveFolderId() {
+        return googleDriveFolderId;
+    }
+
+    public String getLocalMoverFolder() {
+        return localMoverFolder;
+    }
+
     public void setCleaner(CleanerTypes cleanerType) {
         switch (cleanerType) {
             case REMOVER:
@@ -128,7 +137,23 @@ public class Configurator {
             case MOVER_DROPBOX:
                 throw new IllegalArgumentException("Login and password were not entered.");
             case MOVER_GOOGLEDRIVE:
-                cleaner = new MoverGoogleDrive();
+                throw new IllegalArgumentException("Folder id was not entered.");
+        }
+    }
+
+    public void setCleaner(CleanerTypes cleanerType, String folder) {
+        switch (cleanerType) {
+            case REMOVER:
+                throw new IllegalArgumentException("Too much arguments for this cleaner type");
+            case MOVER_LOCAL:
+                setupMoverLocal(folder);
+                localMoverFolder = folder;
+                currentType = CleanerTypes.MOVER_LOCAL;
+                break;
+            case MOVER_DROPBOX:
+                throw new IllegalArgumentException("Login and password were not entered.");
+            case MOVER_GOOGLEDRIVE:
+                cleaner = new MoverGoogleDrive(folder);
                 try {
                     ((MoverGoogleDrive) cleaner).getService();
                 } catch (Exception e) {
@@ -136,24 +161,9 @@ public class Configurator {
                     cleaner = null;
                     return;
                 }
+                googleDriveFolderId = folder;
                 currentType = CleanerTypes.MOVER_GOOGLEDRIVE;
                 break;
-        }
-    }
-
-    public void setCleaner(CleanerTypes cleanerType, String localFolder) {
-        switch (cleanerType) {
-            case REMOVER:
-                throw new IllegalArgumentException("Too much arguments for this cleaner type");
-            case MOVER_LOCAL:
-                setupMoverLocal(localFolder);
-                localMoverFolder = localFolder;
-                currentType = CleanerTypes.MOVER_LOCAL;
-                break;
-            case MOVER_DROPBOX:
-                throw new IllegalArgumentException("Login and password were not entered.");
-            case MOVER_GOOGLEDRIVE:
-                throw new IllegalArgumentException("Too much arguments for this cleaner type");
         }
     }
 
@@ -235,6 +245,7 @@ public class Configurator {
                 break;
             case MOVER_GOOGLEDRIVE:
                 configurationJson.put("type", "MOVER_GOOGLEDRIVE");
+                configurationJson.put("folderId", googleDriveFolderId);
                 break;
             case MOVER_DROPBOX:
                 configurationJson.put("type", "MOVER_DROPBOX");
@@ -281,7 +292,8 @@ public class Configurator {
                 break;
             case "MOVER_GOOGLEDRIVE":
                 resetType();
-                setCleaner(CleanerTypes.MOVER_GOOGLEDRIVE);
+                googleDriveFolderId = (String) jsonObject.get("folderId");
+                setCleaner(CleanerTypes.MOVER_GOOGLEDRIVE, googleDriveFolderId);
                 break;
             case "MOVER_DROPBOX":
                 resetType();
