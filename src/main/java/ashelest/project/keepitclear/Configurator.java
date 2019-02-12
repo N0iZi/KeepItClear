@@ -54,6 +54,7 @@ public class Configurator {
     public Configurator() {
         currentType = CleanerTypes.NONE;
         isOnDuty = false;
+        toLog = false;
     }
 
     public Cleaner getCleaner() {
@@ -69,7 +70,8 @@ public class Configurator {
 
     public boolean setTimer() {
         if (currentType != CleanerTypes.NONE) {
-            timer.scheduleAtFixedRate(new CleanerTimerTask(), sinceDate, period * 86400000);
+            timer = new Timer(true);
+            timer.scheduleAtFixedRate(new CleanerTimerTask(), sinceDate, Long.valueOf(period) * 86400000);
             isOnDuty = true;
             return true;
         }
@@ -94,7 +96,7 @@ public class Configurator {
         period = days;
     }
 
-    public int getPeriod(int days) {
+    public int getPeriod() {
         return period;
     }
 
@@ -118,12 +120,24 @@ public class Configurator {
         return toLog;
     }
 
+    public void setToLog(boolean value) {
+        toLog = value;
+    }
+
     public String getGoogleDriveFolderId() {
         return googleDriveFolderId;
     }
 
     public String getLocalMoverFolder() {
         return localMoverFolder;
+    }
+
+    public void setLocalMoverFolder(String path) {
+        localMoverFolder = path;
+    }
+
+    public String getDropboxAccess() {
+        return dropboxAccess;
     }
 
     public void setCleaner(CleanerTypes cleanerType) {
@@ -141,19 +155,20 @@ public class Configurator {
         }
     }
 
-    public void setCleaner(CleanerTypes cleanerType, String folder) {
+    public void setCleaner(CleanerTypes cleanerType, String folderOrKey) {
         switch (cleanerType) {
             case REMOVER:
                 throw new IllegalArgumentException("Too much arguments for this cleaner type");
             case MOVER_LOCAL:
-                setupMoverLocal(folder);
-                localMoverFolder = folder;
+                setupMoverLocal(folderOrKey);
+                localMoverFolder = folderOrKey;
                 currentType = CleanerTypes.MOVER_LOCAL;
                 break;
             case MOVER_DROPBOX:
-                throw new IllegalArgumentException("Login and password were not entered.");
+                cleaner = new MoverDropbox(dropboxAccess);
+                currentType = CleanerTypes.MOVER_DROPBOX;
             case MOVER_GOOGLEDRIVE:
-                cleaner = new MoverGoogleDrive(folder);
+                cleaner = new MoverGoogleDrive(folderOrKey);
                 try {
                     ((MoverGoogleDrive) cleaner).getService();
                 } catch (Exception e) {
@@ -161,7 +176,7 @@ public class Configurator {
                     cleaner = null;
                     return;
                 }
-                googleDriveFolderId = folder;
+                googleDriveFolderId = folderOrKey;
                 currentType = CleanerTypes.MOVER_GOOGLEDRIVE;
                 break;
         }
@@ -256,6 +271,7 @@ public class Configurator {
             configurationJson.put("period", period);
             configurationJson.put("sinceLastAccess", sinceLastAccess);
             configurationJson.put("sinceDate", sinceDate.getTime());
+            configurationJson.put("toLog", toLog);
         }
         try {
             Files.write(Paths.get("configuration.json"), configurationJson.toJSONString().getBytes());
@@ -305,6 +321,7 @@ public class Configurator {
         period = ((Long) jsonObject.get("period")).intValue();
         sinceLastAccess = ((Long) jsonObject.get("sinceLastAccess")).intValue();
         sinceDate = new Date((Long) jsonObject.get("sinceDate"));
+        toLog = (Boolean) jsonObject.get("toLog");
         return true;
     }
 
