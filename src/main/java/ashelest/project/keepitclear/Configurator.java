@@ -17,8 +17,20 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * Klassa która kontroluje dzałalność czystnika
+ * @author Andriy Shelest
+ * @version 1.0
+ */
+
 public class Configurator {
 
+    /**
+     * Enumeracja typów czystników
+     * @see Configurator#setCleaner(CleanerTypes)
+     * @see Configurator#setCleaner(CleanerTypes, String)
+     * @see Configurator#setCleaner(CleanerTypes, String, String)
+     */
     public enum CleanerTypes {
         NONE,
         REMOVER,
@@ -27,10 +39,21 @@ public class Configurator {
         MOVER_GOOGLEDRIVE
     }
 
+    /**
+     * Atrybuta która pokazuje czy jest czystnik włączony
+     */
     public boolean isOnDuty;
 
+    /**
+     * Klassa wewnętrzna która realizuje harmonogram startów czystki
+     * @see TimerTask
+     */
     private class CleanerTimerTask extends TimerTask {
 
+        /**
+         * Start czystki
+         * @see Cleaner
+         */
         public void run() {
             if (currentType != CleanerTypes.NONE) {
                 cleaner.cleanUp(sinceLastAccess * 86400000, toLog);
@@ -39,28 +62,74 @@ public class Configurator {
 
     }
 
+    /**
+     * Element klassy czystnika
+     */
     private Cleaner cleaner;
+    /**
+     * Element klassy Timer
+     * @see Timer
+     */
     private Timer timer;
+    /**
+     * Klucz dostępu do konta Dropbox
+     * @see MoverDropbox
+     */
     private String dropboxAccess;
+    /**
+     * ID folderu na Google Dysk do którego pliki muszą być przenoszone
+     * @see MoverGoogleDrive
+     */
     private String googleDriveFolderId;
+    /**
+     * Ściężka do folderu lokalnego do którego pliki powinne być przenoszone
+     * @see MoverLocal
+     */
     private String localMoverFolder;
+    /**
+     * Czas "nieotwerania" pliku po którym plik musi być usunięty/przenoszony
+     */
     private int sinceLastAccess;
+    /**
+     * Period czystki
+     */
     private int period;
+    /**
+     * Dzień startowy dla harmonogramu czystki
+     * @see Configurator#setTimer()
+     */
     private Date sinceDate;
+    /**
+     * Wyznacza czy potrzebne logowanie
+     * @see Cleaner
+     */
     private boolean toLog;
 
+    /**
+     * Typ terażniejszego czystnika
+     */
     public CleanerTypes currentType;
 
+    /**
+     * Konstrukror klassy
+     */
     public Configurator() {
         currentType = CleanerTypes.NONE;
         isOnDuty = false;
         toLog = false;
     }
 
+    /**
+     * Zwraca element klassy czystnika
+     * @return element klassy czystnika
+     */
     public Cleaner getCleaner() {
         return cleaner;
     }
 
+    /**
+     * Zrzut klassy czystnika
+     */
     public void resetType() {
         currentType = CleanerTypes.NONE;
         cleaner = null;
@@ -68,6 +137,10 @@ public class Configurator {
         localMoverFolder = null;
     }
 
+    /**
+     * Ustawienie harmonogramu czystki i włączenie czystnika
+     * @return rezultat operacji
+     */
     public boolean setTimer() {
         if (currentType != CleanerTypes.NONE) {
             timer = new Timer(true);
@@ -78,44 +151,81 @@ public class Configurator {
         return false;
     }
 
+    /**
+     * Zrzut harmonogramu czystki i wyłączenie czystnika
+     */
     public void dropTimer() {
         timer.cancel();
         timer = null;
         isOnDuty = false;
     }
 
+    /**
+     * Ustawienie czas "nieotwerania" pliku po którym plik musi być usunięty/przenoszony
+     * @param days - czas "nieotwerania" pliku po którym plik musi być usunięty/przenoszony (dni)
+     */
     public void setSinceLastAccess(int days) {
         sinceLastAccess = days;
     }
 
+    /**
+     * Otrzymanie czasu "nieotwerania" pliku po którym plik musi być usunięty/przenoszony
+     * @return czas "nieotwerania" pliku po którym plik musi być usunięty/przenoszony (dni)
+     */
     public int getSinceLastAccess() {
         return sinceLastAccess;
     }
 
+    /**
+     * Ustalenie periodu czystki
+     * @param days - period czystki (dni)
+     */
     public void setPeriod(int days) {
         period = days;
     }
 
+    /**
+     * Otrzymanie periodu czystki
+     * @return period czystki (dni)
+     */
     public int getPeriod() {
         return period;
     }
 
+    /**
+     * Ustalenie dnia startowy dla harmonogramu czystki
+     * @param date - dzień startowy dla harmonogramu czystki (data)
+     */
     public void setSinceDate(Date date) {
         sinceDate = date;
     }
 
+    /**
+     * Otrzymanie dnia startowego dla harmonogramu czystki
+     * @return dzień startowy dla harmonogramu czystki (data)
+     */
     public Date getSinceDate() {
         return sinceDate;
     }
 
+    /**
+     * Włączenie logowania
+     */
     public void enableLog() {
         toLog = true;
     }
 
+    /**
+     * Wyłączenie logowania
+     */
     public void disableLog() {
         toLog = false;
     }
 
+    /**
+     * Otrymanie znaczenia czy logowanie włączono
+     * @return czy logowanie włączono
+     */
     public boolean getToLog() {
         return toLog;
     }
@@ -124,22 +234,42 @@ public class Configurator {
         toLog = value;
     }
 
+    /**
+     * Otrzymaie ID folderu na Google Dysk do którego pliki muszą być przenoszone
+     * @return ID folderu na Google Dysk do którego pliki muszą być przenoszone
+     */
     public String getGoogleDriveFolderId() {
         return googleDriveFolderId;
     }
 
+    /**
+     * Otrzymanie ściężki do folderu lokalnego do którego pliki powinne być przenoszone
+     * @return ściężka do folderu lokalnego do którego pliki powinne być przenoszone
+     */
     public String getLocalMoverFolder() {
         return localMoverFolder;
     }
 
+    /**
+     * Ustalienie ściężka do folderu lokalnego do którego pliki powinne być przenoszone
+     * @param path - ściężka do folderu lokalnego do którego pliki powinne być przenoszone
+     */
     public void setLocalMoverFolder(String path) {
         localMoverFolder = path;
     }
 
+    /**
+     * Otrymanie klucza dostępu do konta Dropbox
+     * @return klucz dostępu do konta Dropbox
+     */
     public String getDropboxAccess() {
         return dropboxAccess;
     }
 
+    /**
+     * Ustalenie typu czystnika
+     * @param cleanerType - typ czystnika
+     */
     public void setCleaner(CleanerTypes cleanerType) {
         switch (cleanerType) {
             case REMOVER:
@@ -155,6 +285,11 @@ public class Configurator {
         }
     }
 
+    /**
+     * Ustalenie typu czystnika
+     * @param cleanerType - czystnkika
+     * @param folderOrKey - ściężka do folderu lokalnego lub ID folderu Google Dysk lub klucz dostępu do konta Dropbox
+     */
     public void setCleaner(CleanerTypes cleanerType, String folderOrKey) {
         switch (cleanerType) {
             case REMOVER:
@@ -167,6 +302,7 @@ public class Configurator {
             case MOVER_DROPBOX:
                 cleaner = new MoverDropbox(dropboxAccess);
                 currentType = CleanerTypes.MOVER_DROPBOX;
+                break;
             case MOVER_GOOGLEDRIVE:
                 cleaner = new MoverGoogleDrive(folderOrKey);
                 try {
@@ -182,6 +318,12 @@ public class Configurator {
         }
     }
 
+    /**
+     * Ustalenie typu czystnika
+     * @param cleanerType - typ czystnika
+     * @param login - imię użutkownika Dropbox
+     * @param password - hasło do konta Dropbox
+     */
     public void setCleaner(CleanerTypes cleanerType, String login, String password) {
         switch (cleanerType) {
             case REMOVER:
@@ -199,6 +341,12 @@ public class Configurator {
         }
     }
 
+    /**
+     * Ustalenie pierwszego dostępu do konta Dropbox
+     * @param login - imię użutkownika Dropbox
+     * @param password - hasło do konta Dropbox
+     * @return rezultat proby otrzymania pierwszego dostępu
+     */
     private boolean setupDropbox(String login, String password) {
         DbxAppInfo appInfo;
         try {
@@ -241,10 +389,18 @@ public class Configurator {
         return true;
     }
 
+    /**
+     * Metoda dodatkowa dla ustalenie czystnika który przenosze pliki do folderu lokalnego
+     * @param path
+     */
     private void setupMoverLocal(String path) {
         cleaner = new MoverLocal(path);
     }
 
+    /**
+     * Zapisywanie konfiguracji do pliku JSON
+     * @return rezultat zapisywania
+     */
     public boolean writeConfiguration() {
         JSONObject configurationJson = new JSONObject();
         switch (currentType) {
@@ -283,6 +439,10 @@ public class Configurator {
         return true;
     }
 
+    /**
+     * Odczyt konfiguracji z pliku JSON
+     * @return rezultat odczytu konfiguracji
+     */
     public boolean readConfiguration() {
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject;

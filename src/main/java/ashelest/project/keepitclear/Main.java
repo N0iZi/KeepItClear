@@ -15,19 +15,36 @@ import java.util.Calendar;
 
 import java.io.File;
 
+/**
+ * Klassa głowna z realizacją interfejsu graficznego
+ * @see Configurator
+ * @author Andriy Shelest
+ * @version 1.0
+ */
+
 public class Main {
 
+    /**
+     * Element klassy która realizuje okno ustawień czystnika
+     * @see JFrame
+     */
     private JFrame frmKeepitclear;
     private JTextField textField;
     private JTextField textField_2;
     private JPasswordField passwordField;
+    /**
+     * Element klassy konfiguratora
+     */
     private Configurator configurator;
 
     public static final String APPLICATION_NAME = "KeepItClear";
+    /**
+     * Ściężka do pliku graficznego z logotypem aplikacji
+     */
     public static final String ICON_STR = "favicon.png";
 
     /**
-     * Launch the application.
+     * Start aplikacji
      */
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
@@ -47,7 +64,7 @@ public class Main {
     }
 
     /**
-     * Create the application.
+     * Konstruktor klassy głownej
      */
     public Main() {
         configurator = new Configurator();
@@ -55,7 +72,7 @@ public class Main {
     }
 
     /**
-     * Initialize the contents of the frame.
+     * Inicjalizacja interfejsu graficznego
      */
     private void initialize() {
         frmKeepitclear = new JFrame();
@@ -199,7 +216,7 @@ public class Main {
         JLabel label_4 = new JLabel("Period:");
         panel_9.add(label_4);
 
-        JSpinner spinner_1 = new JSpinner();
+        JSpinner spinner_1 = new JSpinner(new SpinnerNumberModel(1, 1, 365, 1));
         panel_9.add(spinner_1);
 
         JLabel label_5 = new JLabel("days");
@@ -369,6 +386,13 @@ public class Main {
         }
     }
 
+    /**
+     * Deaktywacja i aktywacja elementów interfejsu przy włączeniu i wyłączeniu czystnika odpowiedno
+     * @param panel - element JPanel w którym znajdują się elementy interfejsu
+     * @param isEnabled - aktywacja czy deaktywacja
+     * @see JPanel
+     * @see Main#initialize()
+     */
     private void setPanelEnabled(JPanel panel, Boolean isEnabled) {
         panel.setEnabled(isEnabled);
 
@@ -382,6 +406,13 @@ public class Main {
         }
     }
 
+    /**
+     * Realizacja działalności aplikacji w "tle systemowym"
+     * @param frmKeepItClear - element klassy okna ustawień
+     * @see SystemTray
+     * @see TrayIcon
+     * @see PopupMenu
+     */
     private static void setTrayIcon(JFrame frmKeepItClear) {
         if(!SystemTray.isSupported() ) {
             return;

@@ -24,22 +24,50 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Klassa czystnika który przenosze pliki do chmury danych Google Dysk
+ */
+
 public class MoverGoogleDrive extends Cleaner {
+
 
     private String APPLICATION_NAME = "KeepItClear";
     private JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    /**
+     * Ściężka do kluczów dla dostępu do konta Google
+     */
     private String TOKENS_DIRECTORY_PATH = "tokens";
 
+    /**
+     * Obwód zezwoleń dla działalnośći w chmurie danych Google Dysk
+     */
     private List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_FILE);
+    /**
+     * Plik z ID aplikacji w Google Developers Console
+     */
     private String CREDENTIALS_FILE_PATH = "/credentials.json"; //credentials.json file is required to be created through Google Developers site and copied to src/main/java/resources folder
 
+    /**
+     * ID folderu na Google Dysk do którego pliki będą przenoszone
+     */
     private String folderId;
 
+    /**
+     * Konstruktor klassy
+     * @param driveFolderId - ID folderu na Google Dysk do którego pliki muszą być przenoszone
+     */
     public MoverGoogleDrive(String driveFolderId) {
         super();
         this.folderId = driveFolderId;
     }
 
+    /**
+     * Autoryzacja aplikacji w serwisach Google
+     * @param HTTP_TRANSPORT - element klassy dla transportu danych przez HTTP
+     * @see <a href="https://developers.google.com/api-client-library/java/google-http-java-client/reference/1.20.0/com/google/api/client/http/HttpTransport">Dokumentacja Google APIs</a>
+     * @return dane dostępu do Google APIs dla terażniejszej sesji
+     * @throws IOException
+     */
     private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         InputStream in = MoverGoogleDrive.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
@@ -53,6 +81,13 @@ public class MoverGoogleDrive extends Cleaner {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
+    /**
+     * Otrymanie dostępu do konta Google Dysk
+     * @return element klassy dla wezwań do Google Dysk API
+     * @see <a href="https://developers.google.com/resources/api-libraries/documentation/drive/v3/java/latest/com/google/api/services/drive/Drive.html">Dokumentacja Google Dysk API</a>
+     * @throws IOException
+     * @throws GeneralSecurityException
+     */
     public Drive getService() throws IOException, GeneralSecurityException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         return new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
@@ -60,6 +95,12 @@ public class MoverGoogleDrive extends Cleaner {
                 .build();
     }
 
+    /**
+     * Metoda która realizuje działalność czystnika
+     * @param expired - pliki będą usunięte/przenoszone jeżeli nie były otwarte przez dany czas
+     * @param logEnabled - czy potrzebne logowanie. Jeżeli true, to wszystkie czynności będą zapisane
+     * @return zwraca true jeżeli nie było błędów
+     */
     @Override
     public boolean cleanUp(long expired, boolean logEnabled) {
         ArrayList<String> files;

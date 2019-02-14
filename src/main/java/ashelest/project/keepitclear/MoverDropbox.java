@@ -12,20 +12,45 @@ import java.io.InputStream;
 import java.io.File;
 import java.util.ArrayList;
 
+/**
+ * Klassa czystnika który przenosze pliki do chmury danych Dropbox
+ * @see Cleaner
+ * @author Andriy Shelest
+ * @version 1.0
+ */
 public class MoverDropbox extends Cleaner {
 
+    /**
+     * Klucz dla powtórnego dostępu do konta Dropbox
+     * @see MoverDropbox#login()
+     */
     private String ACCESS_TOKEN;
 
+    /**
+     * Konstruktor klassy
+     * @param token - Klucz dostępu do konta Dropbox
+     */
     public MoverDropbox(String token) {
         super();
         this.ACCESS_TOKEN = token;
     }
 
+    /**
+     * Autoryzacja w serwisie Dropbox
+     * @return Klassa dla wyzwań z Dropbox API. Dokładniej: <a href="https://dropbox.github.io/dropbox-sdk-java/api-docs/v2.1.x/">Dokumentacja Dropbox API</a>
+     * @throws DbxException
+     */
     private DbxClientV2 login() throws DbxException {
         DbxRequestConfig config = DbxRequestConfig.newBuilder("shelest/keepitclear").build();
         return new DbxClientV2(config, ACCESS_TOKEN);
     }
 
+    /**
+     * Metoda która realizuje działalność czystnika
+     * @param expired - pliki będą usunięte/przenoszone jeżeli nie były otwarte przez dany czas
+     * @param logEnabled - czy potrzebne logowanie. Jeżeli true, to wszystkie czynności będą zapisane
+     * @return zwraca true jeżeli nie było błędów
+     */
     @Override
     public boolean cleanUp(long expired, boolean logEnabled) {
         ArrayList<String> files;
